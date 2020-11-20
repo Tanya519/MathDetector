@@ -1,17 +1,17 @@
 import numpy as np
 from PIL import Image
-import os
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, BatchNormalization, Activation
 from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.constraints import maxnorm
 from keras.utils import np_utils
-from keras.datasets import cifar10
+import os
 
 def get_names():
     names = os.listdir('./dataset/')
     names.sort()
     return names
+
 
 def make_Y(X):
     k = each_letter_count
@@ -32,8 +32,8 @@ def make_Y(X):
             target += 1
     return y, y_t
 
-def make_dataset(w, h):
 
+def make_dataset(w, h):
     names = get_names()
     test_pict_count = int(len(names) * percentage_in_test)
     pict_count = int(len(names) - test_pict_count)
@@ -42,10 +42,11 @@ def make_dataset(w, h):
     p1 = -1
     p2 = -1
 
+    print('preparing datasets...')
     for pict in range(len(names)):
         name = 'dataset/' + names[pict]
         img = Image.open(name)
-        img = img.resize((w,h))
+        img = img.resize((w, h))
         pix = img.load()
         if pict % each_letter_count < each_letter_count * percentage_in_test:
             p1 += 1
@@ -63,10 +64,11 @@ def make_dataset(w, h):
                     Pixels_info[p2, line, column, 2] = np.array(pix[line, column][2])
     y_train, y_test = make_Y(names)
 
+    print("datasets created")
     return Pixels_info, y_train.reshape(len(y_train), 1), test_Pixels_info, y_test.reshape(len(y_test), 1)
 
-def letter_recognition(X_train, y_train, X_test, y_test):
 
+def letter_recognition(X_train, y_train, X_test, y_test):
     ### Prepare dataset
     X_train = X_train.astype('float32')
     X_test = X_test.astype('float32')
@@ -78,7 +80,7 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     class_num = y_test.shape[1]
 
     ### Prepare model
-
+    print('preparing model...')
     model = Sequential()
 
     model.add(Conv2D(32, (3, 3), input_shape=X_train.shape[1:], padding='same'))
@@ -118,6 +120,7 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     model.add(Activation('softmax'))
 
     epochs = 5
+    print('model created')
 
     model.compile(
         loss='categorical_crossentropy',
@@ -138,14 +141,16 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     scores = model.evaluate(X_test, y_test, verbose=0)
     print("Accuracy: %.2f%%" % (scores[1] * 100))
 
-    y = np.argmax(model.predict(X_test), axis=-1)
-    print(y)
+    ### save model ###
+    model.save('number_recognition.hdf5')
+    ##################
 
+
+    return model
 
 seed = 21
 each_letter_count = 3250
 percentage_in_test = 0.2
 
 X_train, y_train, X_test, y_test = make_dataset(32, 32)
-#(X_train, y_train), (X_test, y_test) = cifar10.load_data()
-letter_recognition(X_train, y_train, X_test, y_test)
+model = letter_recognition(X_train, y_train, X_test, y_test)
