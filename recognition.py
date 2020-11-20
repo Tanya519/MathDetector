@@ -6,6 +6,7 @@ from keras.layers.convolutional import Conv2D, MaxPooling2D
 from keras.constraints import maxnorm
 from keras.utils import np_utils
 import os
+import sys
 
 def get_names():
     names = os.listdir('./dataset/')
@@ -33,6 +34,12 @@ def make_Y(X):
     return y, y_t
 
 
+def print_percentage(p):
+    perc = int(p*100)
+    sys.stdout.write("\r" + str(perc) + "% done ")
+    sys.stdout.flush()
+
+
 def make_dataset(w, h):
     names = get_names()
     test_pict_count = int(len(names) * percentage_in_test)
@@ -48,6 +55,7 @@ def make_dataset(w, h):
         img = Image.open(name)
         img = img.resize((w, h))
         pix = img.load()
+        print_percentage(pict/len(names))
         if pict % each_letter_count < each_letter_count * percentage_in_test:
             p1 += 1
             for line in range(h):
@@ -65,11 +73,12 @@ def make_dataset(w, h):
     y_train, y_test = make_Y(names)
 
     print("datasets created")
-    return Pixels_info, y_train.reshape(len(y_train), 1), test_Pixels_info, y_test.reshape(len(y_test), 1)
+    return Pixels_info, y_train, test_Pixels_info, y_test
 
 
 def letter_recognition(X_train, y_train, X_test, y_test):
     ### Prepare dataset
+
     X_train = X_train.astype('float32')
     X_test = X_test.astype('float32')
     X_train = X_train / 255.0
@@ -105,9 +114,18 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     model.add(Dropout(0.2))
     model.add(BatchNormalization())
 
+    model.add(Conv2D(256, (3, 3), padding='same'))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.2))
+    model.add(BatchNormalization())
+
     model.add(Flatten())
     model.add(Dropout(0.2))
 
+    model.add(Dense(512, kernel_constraint=maxnorm(3)))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.2))
+    model.add(BatchNormalization())
     model.add(Dense(256, kernel_constraint=maxnorm(3)))
     model.add(Activation('relu'))
     model.add(Dropout(0.2))
@@ -119,7 +137,7 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     model.add(Dense(class_num))
     model.add(Activation('softmax'))
 
-    epochs = 5
+    epochs = 10
     print('model created')
 
     model.compile(
@@ -134,7 +152,7 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     print(model.summary())
 
     np.random.seed(seed)
-    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=50)
+    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=20)
 
     # Final evaluation of the model
 
@@ -145,12 +163,9 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     model.save('number_recognition.hdf5')
     ##################
 
-
-    return model
-
 seed = 21
 each_letter_count = 3250
-percentage_in_test = 0.2
+percentage_in_test = 0.1
 
 X_train, y_train, X_test, y_test = make_dataset(32, 32)
-model = letter_recognition(X_train, y_train, X_test, y_test)
+letter_recognition(X_train, y_train, X_test, y_test)

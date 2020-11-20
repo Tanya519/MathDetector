@@ -3,23 +3,29 @@ from PIL import Image
 import numpy as np
 import os
 
+dataset_way = 'test_dataset/'
+
 def get_names():
-    names = os.listdir('./test_dataset/')
+    names = os.listdir('./' + dataset_way)
     names.sort()
     return names
 
-def Test_model(model, w, h):
-    X = load_image(w, h)
-    y = np.argmax(model.predict(X), axis=-1)
-    print(y)
 
-def load_image(w,h):
+def Test_model(model, w, h):
+    # X = load_image(w, h)
+    X = load_image(w, h)
+    y = model.predict_classes(X)
+    print(y)
+    print('hoba')
+
+
+def load_image(w, h):
     names = get_names()
     pict_count = len(names)
     pixels = np.zeros(pict_count * w * h * 3).reshape(pict_count, w, h, 3)
 
     for pict in range(len(names)):
-        name = 'test_dataset/' + names[pict]
+        name = dataset_way + names[pict]
         img = Image.open(name)
         img = img.resize((w, h))
         pix = img.load()
@@ -32,5 +38,6 @@ def load_image(w,h):
 
     return pixels
 
-model = load_model('number_recognition.hdf5')
+
+model = load_model('number_recognition_0.1.hdf5')
 Test_model(model, 32, 32)
