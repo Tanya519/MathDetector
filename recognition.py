@@ -8,8 +8,19 @@ from keras.utils import np_utils
 import os
 import sys
 
+
+### CHECK IT BEFORE RUNNING ###
+
+seed = 21                           ### fix seed for random
+each_letter_count = 3250            ### count of each letter in sample
+percentage_in_test = 0.2            ### percentage of letter in test sample
+dataset_way = 'dataset/'            ### way of dataset folder
+epochs = 25                         ### epochs in learning
+
+###############################
+
 def get_names():
-    names = os.listdir('./dataset/')
+    names = os.listdir('./' + dataset_way)
     names.sort()
     return names
 
@@ -51,7 +62,7 @@ def make_dataset(w, h):
 
     print('preparing datasets...')
     for pict in range(len(names)):
-        name = 'dataset/' + names[pict]
+        name = dataset_way + names[pict]
         img = Image.open(name)
         img = img.resize((w, h))
         pix = img.load()
@@ -137,7 +148,6 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     model.add(Dense(class_num))
     model.add(Activation('softmax'))
 
-    epochs = 10
     print('model created')
 
     model.compile(
@@ -152,7 +162,7 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     print(model.summary())
 
     np.random.seed(seed)
-    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=20)
+    model.fit(X_train, y_train, validation_data=(X_test, y_test), epochs=epochs, batch_size=40)
 
     # Final evaluation of the model
 
@@ -163,9 +173,8 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     model.save('number_recognition.hdf5')
     ##################
 
-seed = 21
-each_letter_count = 3250
-percentage_in_test = 0.1
+    print(model.predict_classes(X_test))
+
 
 X_train, y_train, X_test, y_test = make_dataset(32, 32)
 letter_recognition(X_train, y_train, X_test, y_test)

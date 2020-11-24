@@ -3,7 +3,12 @@ from PIL import Image
 import numpy as np
 import os
 
-dataset_way = 'test_dataset/'
+### CHECK IT BEFORE RUNNING ###
+
+dataset_way = 'test_dataset/'       ### way of dataset folder
+
+###############################
+
 
 def get_names():
     names = os.listdir('./' + dataset_way)
@@ -12,7 +17,6 @@ def get_names():
 
 
 def Test_model(model, w, h):
-    # X = load_image(w, h)
     X = load_image(w, h)
     y = model.predict_classes(X)
     print(y)
@@ -36,8 +40,10 @@ def load_image(w, h):
                 pixels[pict, line, column, 1] = np.array(pix[line, column][1])
                 pixels[pict, line, column, 2] = np.array(pix[line, column][2])
 
+    pixels = pixels.astype('float32')
+    pixels = pixels / 255.0
     return pixels
 
 
-model = load_model('number_recognition_0.1.hdf5')
+model = load_model('number_recognition.hdf5')
 Test_model(model, 32, 32)
