@@ -5,8 +5,8 @@ import os
 
 ### CHECK IT BEFORE RUNNING ###
 
-dataset_way = 'test_dataset/'       ### way of dataset folder
-
+dataset_way = 'partirnated_dataset/'       ### way of dataset folder
+model_name = 'good_model.hdf5'
 ###############################
 
 
@@ -20,7 +20,6 @@ def Test_model(model, w, h):
     X = load_image(w, h)
     y = model.predict_classes(X)
     print(y)
-    print('hoba')
 
 
 def load_image(w, h):
@@ -30,10 +29,11 @@ def load_image(w, h):
 
     for pict in range(len(names)):
         name = dataset_way + names[pict]
-        img = Image.open(name)
+        img_start = Image.open(name)
+        img = Image.new("RGBA", img_start.size)
+        img.paste(img_start)
         img = img.resize((w, h))
         pix = img.load()
-
         for line in range(h):
             for column in range(w):
                 pixels[pict, line, column, 0] = np.array(pix[line, column][0])
@@ -45,5 +45,5 @@ def load_image(w, h):
     return pixels
 
 
-model = load_model('number_recognition.hdf5')
+model = load_model(model_name)
 Test_model(model, 32, 32)
