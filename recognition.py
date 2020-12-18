@@ -8,11 +8,10 @@ from keras.utils import np_utils
 import os
 import sys
 
-
 ### CHECK IT BEFORE RUNNING ###
 
 seed = 21                           ### fix seed for random
-each_letter_count = 5000            ### count of each letter in sample
+each_letter_count = 3250            ### count of each letter in sample
 percentage_in_test = 0.2            ### percentage of letter in test sample
 dataset_way = 'dataset/'            ### way of dataset folder
 epochs = 25                         ### epochs in learning
@@ -46,7 +45,7 @@ def make_Y(X):
 
 
 def print_percentage(p):
-    perc = int(p*100)
+    perc = round(p*100, 4)
     sys.stdout.write("\r" + str(perc) + "% done ")
     sys.stdout.flush()
 
@@ -130,18 +129,8 @@ def letter_recognition(X_train, y_train, X_test, y_test):
     model.add(Dropout(0.2))
     model.add(BatchNormalization())
 
-    model.add(Conv2D(512, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.2))
-    model.add(BatchNormalization())
-
     model.add(Flatten())
     model.add(Dropout(0.2))
-
-    model.add(Conv2D(1024, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.2))
-    model.add(BatchNormalization())
 
     model.add(Dense(512, kernel_constraint=maxnorm(3)))
     model.add(Activation('relu'))

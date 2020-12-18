@@ -7,7 +7,7 @@ import os.path
 import random
 import string
 
-FONTS_PATH = r"F:\My documents\Python проекты\math\fonts"
+FONTS_PATH = r"E:\Proga\Project\Fonts"
 FONT_SUFFIX = '.ttf'
 ttf_files = [name for name in os.listdir(FONTS_PATH) if name.endswith(FONT_SUFFIX)]
 
@@ -51,11 +51,11 @@ class DatasetItem_degree:
 
         # print(ttf_files)
         for font_file in ttf_files:
-            img = Image.new('RGBA', (len(self.value_) * 30 + 50, 80), color="white")
+            img = Image.new('RGBA', (len(self.value_) * 40 + 200, 200), color="white")
             draw = ImageDraw.Draw(img)
             x_coord = random.randint(0, 30)
-            y_coord = random.randint(10, 40)
-            wsize = random.randint(30, 50)
+            y_coord = random.randint(10, 100)
+            wsize = random.randint(80, 150)
             draw.text((x_coord, y_coord), self.value_, font=ImageFont.truetype(os.path.join(FONTS_PATH, font_file),
                                                                                size=wsize), fill="gray")
             if self.degree_:
@@ -77,46 +77,64 @@ class DatasetItem_degree:
 
 items = []
 
-print('generating digits')
-for digit in range(10):
-    items.append(DatasetItem_degree(str(digit), None, f"digit_{digit}").generate("dataset"))
-print('done')
 
-print('generating lowercase')
-for char in string.ascii_lowercase:
-    items.append(DatasetItem_degree(char, None, f"letter_{char}").generate("dataset"))
-print('done')
+def generate_digits():
+    print('generating digits')
+    for digit in range(10):
+        items.append(DatasetItem_degree(str(digit), None, f"digit_{digit}").generate("dataset"))
+    print('done')
 
-print('generating uppercase')
-for char in string.ascii_uppercase:
-    items.append(DatasetItem_degree(char, None, f"letter_cap_{char}").generate("dataset"))
-print('done')
 
-print('generating signs')
-named_signs = {'+': 'plus',
-               '-': 'minus',
-               '*': 'asterisc',
-               '=': 'equals',
-               }
-for sign in named_signs:
-    items.append(DatasetItem_degree(sign, None, f"sign_{named_signs[sign]}").generate("dataset"))
-print('done')
+def generate_lowercase():
+    print('generating lowercase')
+    for char in string.ascii_lowercase:
+        items.append(DatasetItem_degree(char, None, f"letter_{char}").generate("dataset"))
+    print('done')
 
-print('generating expressions')
-expressions = [
-    'x+y', '2+2=4+2+2+2+2+2', '5=2 mod 3', '5%3=2'
-]
-for index, expr in enumerate(expressions):
-    items.append(DatasetItem_degree(expr, None, f"expr_{index:05d}").generate("dataset"))
-print('done')
 
-print('generating degrees')
-for digit in range(10):
-    for degree in range(10):
-        items.append(DatasetItem_degree(str(digit), str(degree), f"digitt_{digit}_{degree}").generate("dataset"))
+def generate_uppercase():
+    print('generating uppercase')
+    for char in string.ascii_uppercase:
+        items.append(DatasetItem_degree(char, None, f"letter_cap_{char}").generate("dataset"))
+    print('done')
 
-meta_pairs = [(e.value_, fn) for e in items for fn in e.filenames_]
-metadata = pd.DataFrame({'value': [e for e, _ in meta_pairs],
-                         'filename': [e for _, e in meta_pairs],
-                         })
-metadata.to_csv('metadata.csv', index=False)
+
+def generate_signs():
+    print('generating signs')
+    named_signs = {'+': 'plus',
+                   '-': 'minus',
+                   '*': 'asterisc',
+                   '=': 'equals',
+                   }
+    for sign in named_signs:
+        items.append(DatasetItem_degree(sign, None, f"sign_{named_signs[sign]}").generate("dataset"))
+    print('done')
+
+
+def generate_expressions():
+    print('generating expressions')
+    expressions = [
+        'x+y', '2+2=4+2+2+2+2+2', '5=2 mod 3', '5%3=2'
+    ]
+    for index, expr in enumerate(expressions):
+        items.append(DatasetItem_degree(expr, None, f"expr_{index:05d}").generate("dataset"))
+    print('done')
+
+
+def generate_degrees():
+    print('generating degrees')
+    for digit in range(10):
+        for degree in range(10):
+            items.append(DatasetItem_degree(str(digit), str(degree), f"digitt_{digit}_{degree}").generate("dataset"))
+
+
+def metas():
+    meta_pairs = [(e.value_, fn) for e in items for fn in e.filenames_]
+    metadata = pd.DataFrame({'value': [e for e, _ in meta_pairs],
+                             'filename': [e for _, e in meta_pairs],
+                             })
+    metadata.to_csv('metadata.csv', index=False)
+
+
+generate_expressions()
+metas()
